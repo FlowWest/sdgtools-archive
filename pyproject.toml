@@ -1,0 +1,13 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "sdgtools"
+version = "0.1.0"
+description = "A simple CLI tool for processing SDG related data"
+requires-python = ">=3.8"
+dependencies = ["click>=8.1.0"]
+
+[project.scripts]
+sdgtools = "sdgtools:cli"
