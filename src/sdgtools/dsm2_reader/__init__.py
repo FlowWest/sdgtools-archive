@@ -3,8 +3,9 @@ import pandas as pd
 from dataclasses import dataclass
 from pathlib import Path
 import os
+import datetime
 
-from typing import Dict
+from typing import Dict, List
 
 from pandas.core.series import validate_bool_kwarg
 
@@ -142,11 +143,16 @@ def get_all_data_from_dsm2_dss(
     out = {}
     cat = dss.get_catalog()
     paths = list(cat.recordTypeDict.keys())
+    print(f"inside the get all function, {paths}")
     for i, path in enumerate(paths):
         path_data = dss.get(path)
+        datetimes_for_data = path_data.get_dates()
         out[path] = pd.DataFrame(
             {
-                "datetime": path_data.get_dates(),  # type: ignore
+                "datetime": [
+                    datetime.datetime.strftime(s, "%Y-%m-%d %H:%M:%S")
+                    for s in datetimes_for_data
+                ],  # type: ignore
                 "value": path_data.get_values(),  # type: ignore
                 "unit": path_data.units,  # type: ignore
             }
@@ -172,14 +178,14 @@ def get_all_data_from_dsm2_dss(
 
 def read_hydro_dss(filepath) -> pd.DataFrame:
     dss = HecDss(filepath)
-    part_names = {"B": "gate", "C": "parameter", "F": "scenario"}
+    part_names = {"B": "node", "C": "parameter", "F": "scenario"}
     data = get_all_data_from_dsm2_dss(dss, part_names=part_names, concat=True)
     return data
 
 
 def read_gates_dss(filepath):
     dss = HecDss(filepath)
-    part_names = {"B": "gate_op", "F": "scenario"}
+    part_names = {"B": "node", "F": "scenario"}
     data = get_all_data_from_dsm2_dss(dss, part_names=part_names, concat=True)
     return data
 
