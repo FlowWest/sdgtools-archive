@@ -1,8 +1,10 @@
 from .dsm2_reader import read_hydro_dss, read_gates_dss
+from .h5_reader import get_output_channel_names
 import pandas as pd
 import rich_click as click
 import numpy as np
 import sqlite3
+import h5py
 
 click.rich_click.USE_MARKDOWN = True
 
@@ -106,6 +108,29 @@ def sdg(file, output, delim):
     except Exception as e:
         click.echo("unable to process file")
         click.echo(e)
+
+
+@cli.command()
+@click.argument("file")
+def h5(file):
+    """
+    Process HDF5 File
+    """
+    click.echo("processing h5 file")
+    try:
+        h5 = h5py.File(file, "r")
+        data = get_output_channel_names(h5)
+        h5.close()
+        print(data)
+        click.echo("done!")
+        return data
+    except FileNotFoundError as e:
+        click.echo(
+            click.style(
+                f"The file provided '{file}' was not found! Please check path to file and try again",
+                fg="red",
+            )
+        )
 
 
 if __name__ == "__main__":
