@@ -4,6 +4,8 @@ click==8.1.7
     # via
     #   -r requirements.in
     #   rich-click
+h5py==3.12.1
+    # via -r requirements.in
 markdown-it-py==3.0.0
     # via rich
 mdurl==0.1.2
@@ -11,6 +13,7 @@ mdurl==0.1.2
 numpy==2.2.0
     # via
     #   -r requirements.in
+    #   h5py
     #   pandas
 pandas==2.2.3
     # via -r requirements.in
