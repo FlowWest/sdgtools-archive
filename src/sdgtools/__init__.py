@@ -40,7 +40,6 @@ def cli(): ...
 @click.option(
     "-d",
     "--database-file",
-    prompt="save results to database?",
     default=None,
     help="should results be inserted into database? Ommit to just write to file, or provide path to sqlite3 database to perform data insert",
 )
@@ -58,7 +57,7 @@ def hydro(file, output, database_file):
     try:
         data: pd.DataFrame = read_hydro_dss(file)
         click.echo(click.style("\nStarting csv write...\n", fg="green"))
-        # data.to_csv(output, index=False)
+        data.to_csv(output, index=False)
         click.echo(click.style(f"\nfinished writting to file {output}\n", fg="green"))
 
     except Exception as e:
