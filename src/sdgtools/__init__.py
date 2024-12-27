@@ -44,7 +44,10 @@ def cli(): ...
     help="should results be inserted into database? Ommit to just write to file, or provide path to sqlite3 database to perform data insert",
 )
 @click.option(
-    "-l", "--location-filter", help="Comma seperated list of locations to filter to"
+    "-l",
+    "--location-filter",
+    help="Comma seperated list of locations to filter to",
+    default=None,
 )
 def hydro(file, output, database_file, location_filter):
     """
@@ -67,6 +70,7 @@ def hydro(file, output, database_file, location_filter):
         click.echo(click.style("\nStarting csv write...\n", fg="green"))
         data.to_csv(output, index=False)
         click.echo(click.style(f"\nfinished writting to file {output}\n", fg="green"))
+        click.echo(f"the filter applied was: {location_filter}")
 
     except Exception as e:
         click.echo(click.style(f"processing the file: {file}", fg="red"))

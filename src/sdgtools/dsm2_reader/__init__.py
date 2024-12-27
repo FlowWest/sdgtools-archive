@@ -135,59 +135,55 @@ def read_echo_file(filepath: str):
         return df
 
 
-def concat_parts_to_path(item):
-    return f"/{item.A}/{item.B}/{item.C}//{item.E}/{item.F}/"
+def concat_parts_to_path(item) -> Dict[str, str]:
+    d = {
+        "node": item.B,
+        "param": item.C,
+        "path": f"/{item.A}/{item.B}/{item.C}//{item.E}/{item.F}/",
+    }
+    return d
 
 
 def get_all_data_from_dsm2_dss(
     dss: HecDss,
-    part_names: Dict[str, str] | None = None,
     filter: Dict[str, Any] | None = None,
     concat: bool = False,
 ) -> pd.DataFrame | Dict[str, pd.DataFrame]:
     out = {}
     cat = dss.get_catalog()
     if filter is None:
-        paths = list(cat.recordTypeDict.keys())
+        paths = [concat_parts_to_path(i) for i in cat.items]
     else:
         paths = []
         for i in cat.items:
             if "b" in filter:
                 if i.B in filter.get("b"):
                     paths.append(concat_parts_to_path(i))
-            if "c" in filter:
+            elif "c" in filter:
                 if i.C in filter.get("c"):
                     paths.append(concat_parts_to_path(i))
-            if "d" in filter:
+            elif "d" in filter:
                 if i.D in filter.get("d"):
                     paths.append(concat_parts_to_path(i))
 
-    for i, path in enumerate(paths):
-        path_data = dss.get(path)
-        datetimes_for_data = path_data.get_dates()
-        out[path] = pd.DataFrame(
+    print(f"the paths being used are: {paths}")
+
+    for path in paths:
+        print("made it to here---------")
+        path_data = dss.get(path.get("path"))  # type: ignore
+        datetimes_for_data = path_data.get_dates()  # type: ignore
+        out[path.get("path")] = pd.DataFrame(
             {
                 "datetime": [
                     datetime.datetime.strftime(s, "%Y-%m-%d %H:%M:%S")
                     for s in datetimes_for_data
                 ],  # type: ignore
+                "node": path.get("node"),
+                "param": path.get("param"),
                 "value": path_data.get_values(),  # type: ignore
                 "unit": path_data.units,  # type: ignore
             }
         )
-        if part_names is not None:
-            if "A" in part_names:
-                out[path][part_names.get("A")] = cat.items[i].A
-            if "B" in part_names:
-                out[path][part_names.get("B")] = cat.items[i].B
-            if "C" in part_names:
-                out[path][part_names.get("C")] = cat.items[i].C
-            if "D" in part_names:
-                out[path][part_names.get("D")] = cat.items[i].D
-            if "E" in part_names:
-                out[path][part_names.get("E")] = cat.items[i].E
-            if "F" in part_names:
-                out[path][part_names.get("F")] = cat.items[i].F
 
     if concat:
         return pd.concat(out.values())
@@ -196,19 +192,13 @@ def get_all_data_from_dsm2_dss(
 
 def read_hydro_dss(filepath, filter=None) -> pd.DataFrame:
     dss = HecDss(filepath)
-    part_names = {"B": "node", "C": "parameter", "F": "scenario"}
-    data = get_all_data_from_dsm2_dss(
-        dss, part_names=part_names, filter=filter, concat=True
-    )
+    data = get_all_data_from_dsm2_dss(dss, filter=filter, concat=True)
     return data
 
 
 def read_gates_dss(filepath, filter=None):
     dss = HecDss(filepath)
-    part_names = {"B": "node", "F": "scenario"}
-    data = get_all_data_from_dsm2_dss(
-        dss, part_names=part_names, filter=filter, concat=True
-    )
+    data = get_all_data_from_dsm2_dss(dss, filter=filter, concat=True)
     return data
 
 
