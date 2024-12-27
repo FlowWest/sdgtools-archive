@@ -38,26 +38,27 @@ def cli(): ...
 @click.argument("file", type=str)
 @click.argument("output", type=str)
 @click.option(
-    "-d",
-    "--database-file",
-    default=None,
-    help="should results be inserted into database? Ommit to just write to file, or provide path to sqlite3 database to perform data insert",
-)
-@click.option(
     "-l",
     "--location-filter",
     help="Comma seperated list of locations to filter to",
     default=None,
 )
-def hydro(file, output, database_file, location_filter):
+@click.option(
+    "-d",
+    "--database-file",
+    default=None,
+    help="Should results be inserted into database? Ommit to just write to file, or provide path to sqlite3 database to perform data insert",
+)
+def dss(file, output, database_file, location_filter):
     """
-    Process Hydro DSS Output.
+    Process DSM2 DSS Output.
 
-    Processing Hydro DSS Output assumes the following from the DSS parts.
+    Processing DSS Output assumes the following from the DSS parts.
 
-    * Part B: gate, column name "gate"
-    * Part C: measured parameter, column name "parameter"
-    * Part F: scenario, column name "scenario"
+    * Part B: hold simulated node and is mapped to column "node"
+    * Part C: holds simulated parameter and is mapped to column name "parameter"
+    * Part F: holds simulated scenario and it mapped to column name "scenario"
+
     """
     click.echo(click.style(f"processing the file: {file}", fg="green"))
     if location_filter is not None:
@@ -67,10 +68,10 @@ def hydro(file, output, database_file, location_filter):
         location_filter = {"b": locations}
     try:
         data: pd.DataFrame = read_hydro_dss(file, filter=location_filter)
-        click.echo(click.style("\nStarting csv write...\n", fg="green"))
+        click.echo(click.style("\nStarting csv write...", fg="green"))
         data.to_csv(output, index=False)
-        click.echo(click.style(f"\nfinished writting to file {output}\n", fg="green"))
-        click.echo(f"the filter applied was: {location_filter}")
+        click.secho("finished writing to file: ", fg="green", nl=False)
+        click.secho(f"{output}", fg="yellow", nl=True)
 
     except Exception as e:
         click.echo(click.style(f"processing the file: {file}", fg="red"))
@@ -95,31 +96,6 @@ def hydro(file, output, database_file, location_filter):
             click.echo(click.style(f"Error writting to databae file", fg="red"))
             click.echo(click.style(f"full error from database\n{e}", fg="red"))
         click.echo(click.style(f"done!\n", fg="green"))
-
-
-@cli.command()
-@click.argument("file")
-@click.argument("output")
-def sdg(file, output, delim):
-    """
-    Process SDG DSS Output.
-
-    __FILE__: the dss file to process
-
-    __OUTPUT__: the filename to create for processed data
-
-    Processing SDG DSS Output assumes the following from the DSS parts.
-
-    * Part B: gate operation, column name "gate_op"
-    * Part F: scenario name, column name "scenario"
-    """
-    click.echo(f"processing file {file}")
-    try:
-        data: pd.DataFrame = read_gates_dss(file)
-        data.to_csv(output)
-    except Exception as e:
-        click.echo("unable to process file")
-        click.echo(e)
 
 
 @cli.command()
