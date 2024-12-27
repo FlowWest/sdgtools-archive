@@ -5,7 +5,7 @@ from pathlib import Path
 import os
 import datetime
 
-from typing import Dict, List
+from typing import Any, Dict, List
 
 from pandas.core.series import validate_bool_kwarg
 
@@ -135,15 +135,33 @@ def read_echo_file(filepath: str):
         return df
 
 
+def concat_parts_to_path(item):
+    return f"/{item.A}/{item.B}/{item.C}//{item.E}/{item.F}/"
+
+
 def get_all_data_from_dsm2_dss(
     dss: HecDss,
     part_names: Dict[str, str] | None = None,
+    filter: Dict[str, Any] | None = None,
     concat: bool = False,
 ) -> pd.DataFrame | Dict[str, pd.DataFrame]:
     out = {}
     cat = dss.get_catalog()
-    paths = list(cat.recordTypeDict.keys())
-    print(f"inside the get all function, {paths}")
+    if filter is None:
+        paths = list(cat.recordTypeDict.keys())
+    else:
+        paths = []
+        for i in cat.items:
+            if "b" in filter:
+                if i.B in filter.get("b"):
+                    paths.append(concat_parts_to_path(i))
+            if "c" in filter:
+                if i.C in filter.get("c"):
+                    paths.append(concat_parts_to_path(i))
+            if "d" in filter:
+                if i.D in filter.get("d"):
+                    paths.append(concat_parts_to_path(i))
+
     for i, path in enumerate(paths):
         path_data = dss.get(path)
         datetimes_for_data = path_data.get_dates()
@@ -176,17 +194,21 @@ def get_all_data_from_dsm2_dss(
     return out
 
 
-def read_hydro_dss(filepath) -> pd.DataFrame:
+def read_hydro_dss(filepath, filter=None) -> pd.DataFrame:
     dss = HecDss(filepath)
     part_names = {"B": "node", "C": "parameter", "F": "scenario"}
-    data = get_all_data_from_dsm2_dss(dss, part_names=part_names, concat=True)
+    data = get_all_data_from_dsm2_dss(
+        dss, part_names=part_names, filter=filter, concat=True
+    )
     return data
 
 
-def read_gates_dss(filepath):
+def read_gates_dss(filepath, filter=None):
     dss = HecDss(filepath)
     part_names = {"B": "node", "F": "scenario"}
-    data = get_all_data_from_dsm2_dss(dss, part_names=part_names, concat=True)
+    data = get_all_data_from_dsm2_dss(
+        dss, part_names=part_names, filter=filter, concat=True
+    )
     return data
 
 

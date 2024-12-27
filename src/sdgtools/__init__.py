@@ -43,7 +43,10 @@ def cli(): ...
     default=None,
     help="should results be inserted into database? Ommit to just write to file, or provide path to sqlite3 database to perform data insert",
 )
-def hydro(file, output, database_file):
+@click.option(
+    "-l", "--location-filter", help="Comma seperated list of locations to filter to"
+)
+def hydro(file, output, database_file, location_filter):
     """
     Process Hydro DSS Output.
 
@@ -54,8 +57,13 @@ def hydro(file, output, database_file):
     * Part F: scenario, column name "scenario"
     """
     click.echo(click.style(f"processing the file: {file}", fg="green"))
+    if location_filter is not None:
+        locations = [
+            location.strip().lower() for location in location_filter.split(",")
+        ]
+        location_filter = {"b": locations}
     try:
-        data: pd.DataFrame = read_hydro_dss(file)
+        data: pd.DataFrame = read_hydro_dss(file, filter=location_filter)
         click.echo(click.style("\nStarting csv write...\n", fg="green"))
         data.to_csv(output, index=False)
         click.echo(click.style(f"\nfinished writting to file {output}\n", fg="green"))
@@ -64,10 +72,11 @@ def hydro(file, output, database_file):
         click.echo(click.style(f"processing the file: {file}", fg="red"))
         click.echo(
             click.style(
-                "\n\noops! I can't process that kind of dss file, most likely reason is dss file must be version 7",
+                "\n\nUnable to process DSS file, please make sure it is a version 7 dss file. Use DSSVue to convert to version 7 if needed.",
                 fg="red",
             )
         )
+        click.echo(print(e))
         return
 
     if database_file is not None:
