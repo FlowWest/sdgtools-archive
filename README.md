@@ -15,6 +15,9 @@ cd sdgtools
 
 # install
 pip install -e .
+
+# or if using uv 
+uv pip install -e .
 ```
 
 ## Usage
