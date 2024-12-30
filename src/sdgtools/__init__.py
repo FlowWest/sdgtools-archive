@@ -84,7 +84,15 @@ def cli(): ...
     help="Should results be inserted into database? Ommit to just write to file, or provide path to sqlite3 database to perform data insert (experimental)",
 )
 @click.option("--verbose", "-v", is_flag=True, help="Enable verbose output")
-def dss(file, output, database_file, location_filter, verbose):
+def dss(
+    file,
+    output,
+    database_file,
+    location_filter,
+    parameter_filter,
+    datetime_filter,
+    verbose,
+):
     """
     Process DSM2 DSS Output.
 
@@ -94,11 +102,15 @@ def dss(file, output, database_file, location_filter, verbose):
     * Part C: holds simulated parameter and is mapped to column name "parameter"
     * Part F: holds simulated scenario and it mapped to column name "scenario"
 
-    __Filters__: a note on filters, they are applied with the AND predicate, that is if you pass a node and a parameter
-    the paths that contain both the node AND the parameter will be used. If you wish to filter with OR we recommend
-    you apply a filter that gets all of the data and perfrom additional filtering post-processing from the csv.
+    __Filters__: a note on filters, they are applied with the OR predicate, that is if you pass a node and a parameter
+    the paths that contain either the node OR the parameter will be used.
 
     """
+    if parameter_filter is not None:
+        click.secho("parameter_filter not implemented yet!", fg="orange")
+    if datetime_filter is not None:
+        click.secho("datetime_filter not implemented yet!", fg="orange")
+
     click.echo(click.style(f"processing the file: {file}", fg="green"))
     if location_filter is not None:
         locations = [
