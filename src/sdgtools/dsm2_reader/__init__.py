@@ -167,6 +167,8 @@ def get_all_data_from_dsm2_dss(
                     paths.append(concat_parts_to_path(i))
 
     print(f"the paths being used are: {paths}")
+    if len(paths) == 0:
+        return pd.DataFrame()
 
     for path in paths:
         print("made it to here---------")
@@ -188,18 +190,6 @@ def get_all_data_from_dsm2_dss(
     if concat:
         return pd.concat(out.values())
     return out
-
-
-def read_hydro_dss(filepath, filter=None) -> pd.DataFrame:
-    dss = HecDss(filepath)
-    data = get_all_data_from_dsm2_dss(dss, filter=filter, concat=True)
-    return data
-
-
-def read_gates_dss(filepath, filter=None):
-    dss = HecDss(filepath)
-    data = get_all_data_from_dsm2_dss(dss, filter=filter, concat=True)
-    return data
 
 
 def read_scenario_dir(

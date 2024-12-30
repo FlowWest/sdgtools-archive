@@ -1,12 +1,34 @@
-from .dsm2_reader import read_hydro_dss, read_gates_dss
+from .dsm2_reader import get_all_data_from_dsm2_dss
 from .h5_reader import get_output_channel_names
 import pandas as pd
 import rich_click as click
 import numpy as np
 import sqlite3
 import h5py
+import sys
+import io
+import os
+from contextlib import contextmanager
+from hecdss import HecDss
 
 click.rich_click.USE_MARKDOWN = True
+
+
+@contextmanager
+def suppress_stdout(suppress=True):
+    """Context manager to suppress stdout"""
+    if suppress:
+        # Save the current stdout
+        old_stdout = sys.stdout
+        # Redirect stdout to a dummy file-like object
+        sys.stdout = io.StringIO()
+        try:
+            yield
+        finally:
+            # Restore stdout
+            sys.stdout = old_stdout
+    else:
+        yield
 
 
 def insert_into_database(data, db):
@@ -44,12 +66,25 @@ def cli(): ...
     default=None,
 )
 @click.option(
+    "-p",
+    "--parameter-filter",
+    help="Comma seperated list of parameters to filter to",
+    default=None,
+)
+@click.option(
+    "-t",
+    "--datetime-filter",
+    help="A start and endtime to filter to. The filter must be in the format `2012-01-01,2022-01-01` for start and end, or `2012-01-01,` and `,2012-01-01` for just one of start or end",
+    default=None,
+)
+@click.option(
     "-d",
     "--database-file",
     default=None,
-    help="Should results be inserted into database? Ommit to just write to file, or provide path to sqlite3 database to perform data insert",
+    help="Should results be inserted into database? Ommit to just write to file, or provide path to sqlite3 database to perform data insert (experimental)",
 )
-def dss(file, output, database_file, location_filter):
+@click.option("--verbose", "-v", is_flag=True, help="Enable verbose output")
+def dss(file, output, database_file, location_filter, verbose):
     """
     Process DSM2 DSS Output.
 
@@ -59,6 +94,10 @@ def dss(file, output, database_file, location_filter):
     * Part C: holds simulated parameter and is mapped to column name "parameter"
     * Part F: holds simulated scenario and it mapped to column name "scenario"
 
+    __Filters__: a note on filters, they are applied with the AND predicate, that is if you pass a node and a parameter
+    the paths that contain both the node AND the parameter will be used. If you wish to filter with OR we recommend
+    you apply a filter that gets all of the data and perfrom additional filtering post-processing from the csv.
+
     """
     click.echo(click.style(f"processing the file: {file}", fg="green"))
     if location_filter is not None:
@@ -67,7 +106,18 @@ def dss(file, output, database_file, location_filter):
         ]
         location_filter = {"b": locations}
     try:
-        data: pd.DataFrame = read_hydro_dss(file, filter=location_filter)
+        if not os.path.exists(file):
+            click.secho(f"Error: File not found {file}", err=True, fg="red", nl=True)
+            return
+
+        dss = HecDss(file)
+        data: pd.DataFrame = get_all_data_from_dsm2_dss(
+            dss, filter=location_filter, concat=True
+        )
+
+        if len(data) == 0:
+            click.secho("no data returned", fg="green")
+            return
         click.echo(click.style("\nStarting csv write...", fg="green"))
         data.to_csv(output, index=False)
         click.secho("finished writing to file: ", fg="green", nl=False)
