@@ -16,7 +16,7 @@ cd sdgtools
 # install
 pip install -e .
 
-# or if using uv 
+# or if using uv
 uv pip install -e .
 ```
 
@@ -25,12 +25,12 @@ uv pip install -e .
 Extract all data from a hydro dss file:
 
 ```bash
-sdgtools hydro FPV1Ma_hydro_V7.dss output-file.csv
+sdgtools FPV1Ma_hydro_V7.dss output-file.csv
 ```
 Filter to nodes of interest, this will filter to nodes "anh" and "clf" before processing.
 
 ```bash
-sdgtools hydro --filter-location anh,clf FPV1Ma_hydro_V7.dss output-file.csv 
+sdgtools --filter-location anh,clf FPV1Ma_hydro_V7.dss output-file.csv 
 ```
 
 
