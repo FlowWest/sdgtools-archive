@@ -56,6 +56,7 @@ def insert_into_database(data, db):
 def cli(): ...
 
 
+# DSS processing
 @cli.command()
 @click.argument("file", type=str)
 @click.argument("output", type=str)
@@ -182,6 +183,18 @@ def h5(file):
                 fg="red",
             )
         )
+
+
+@cli.command()
+@click.argument("input_file")
+@click.argument("output_file")
+@click.option("--kind", "-k", help="perform this post process routine")
+def process(input_file, output_file, kind):
+    """
+    Perform post process on existing CSV file.
+
+    """
+    ...
 
 
 if __name__ == "__main__":
