@@ -1,4 +1,4 @@
-from .dsm2_reader import get_all_data_from_dsm2_dss
+from .dss_reader import get_all_data_from_dsm2_dss
 from .h5_reader import get_output_channel_names
 import pandas as pd
 import rich_click as click
@@ -96,6 +96,7 @@ def dss(
     """
     Process DSM2 DSS Output.
 
+
     Processing DSS Output assumes the following from the DSS parts.
 
     * Part B: hold simulated node and is mapped to column "node"
@@ -107,9 +108,9 @@ def dss(
 
     """
     if parameter_filter is not None:
-        click.secho("parameter_filter not implemented yet!", fg="orange")
+        click.secho("parameter_filter not implemented yet!", fg="yellow")
     if datetime_filter is not None:
-        click.secho("datetime_filter not implemented yet!", fg="orange")
+        click.secho("datetime_filter not implemented yet!", fg="yellow")
 
     click.echo(click.style(f"processing the file: {file}", fg="green"))
     if location_filter is not None:

@@ -19,4 +19,6 @@ def get_output_channel_names(h5):
         }
     )
 
+    channel_names.to_csv("channel_names_from_h5.csv")
+
     return channel_names
