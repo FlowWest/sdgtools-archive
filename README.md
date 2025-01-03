@@ -32,9 +32,12 @@ filepath = "path/to/file.dss"
 
 dss = HecDss(filepath)
 data = get_all_data_from_dsm2_dss(dss)
+
+# filter data to just certain nodes, we pass in a filter to part b of dss
+data = get_all_data_from_dsm2_dss(dss, filter={"b": ["anh", "glf"]})
 ```
 
-Extract all data from a hydro dss file:
+The corresponding operations in the CLI are:
 
 ```bash
 sdgtools dss FPV1Ma_hydro_V7.dss output-file.csv
@@ -44,6 +47,8 @@ Filter to nodes of interest, this will filter to nodes "anh" and "clf" before pr
 ```bash
   sdgtools dss --filter-location anh,clf FPV1Ma_hydro_V7.dss output-file.csv 
 ```
+
+For cli help simply call `sdgtools --help`
 
 
 
