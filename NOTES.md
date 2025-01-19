@@ -39,3 +39,9 @@ __ELEV__ - represents gate operations
 - MID_GATEOP
 - GLC_GATEOP
 - OLD_GATEOP
+
+Therefore using `sdgtools` we can do the following to get all this data at once:
+
+```bash
+sdgtools dss --location-filter GLC_FLOW_FISH,MID_FLOW_FISH,OLD_FLOW_FISH FPV1Ma_SDG_V7.dss fpv1ma_sdg_flow_export.csv
+```
