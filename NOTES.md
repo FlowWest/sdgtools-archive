@@ -20,9 +20,17 @@ for this model are:
 The SDG data that corresponds to datasets of the form __FPV1Ma_SDG.dss__ are used to extract 
 following data.
 
-__device-flow__ - represents flows at the gates
+__DEVICE-FLOW__ - represents flows at the gates
 - GLC_FLOW_FISH
 - MID_FLOW_FISH
 - MID_FLOW_GATE
 - OLD_FLOW_FISH
 - OLD_FLOW_GATE
+
+__STAGE__ - represents gate elevations
+- MID_GATE_UP
+- MID_GATE_DOWN
+- GLC_GATE_UP
+- GLC_GATE_DOWN
+- OLD_GATE_UP
+- OLD_GATE_DOWN
