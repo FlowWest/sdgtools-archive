@@ -7,10 +7,10 @@ Here are some notes for the data processing of model output files
 For each scenario we have a few different dss files. For example scenario "FPV1Ma" the files
 for this model are:
 
-| Filename                  | Type   |
-|---------------------------|--------|
-| FPV1Ma.hof                 | text   |
-| FPV1Ma_CCF.dss             | binary |
-| FPV1Ma_SDG.dss             | binary |
-| FPV1Ma_hydro.dss           | binary |
-| hydro_echo_FPV1Ma.inp      | text   |
+| Filename                  | Type   | Description |
+|---------------------------|--------| ------------|
+| FPV1Ma.hof                 | text   | ? |
+| FPV1Ma_CCF.dss             | binary | ? |
+| FPV1Ma_SDG.dss             | binary | ? | 
+| FPV1Ma_hydro.dss           | binary | water level/stage data | 
+| hydro_echo_FPV1Ma.inp      | text   | model metadata |
