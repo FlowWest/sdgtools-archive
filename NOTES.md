@@ -34,3 +34,8 @@ __STAGE__ - represents gate elevations
 - GLC_GATE_DOWN
 - OLD_GATE_UP
 - OLD_GATE_DOWN
+
+__ELEV__ - represents gate operations
+- MID_GATEOP
+- GLC_GATEOP
+- OLD_GATEOP
