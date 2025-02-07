@@ -20,19 +20,24 @@ def insert_dsm2_data(
     """
     Insert data into database
     """
-    conn = psycopg2.connect(**conn_creds)
-    cur = conn.cursor()
-    scenario_id_q = sql.SQL("SELECT id from scenarios where name = %s")
-    cur.execute(scenario_id_q, (scenario_name,))
-    scenario_id = cur.fetchall()
-    if len(scenario_id) == 0:
-        try:
-            scenario_id = insert_scenario(scenario_name, conn_creds)
-        except Exception as e:
-            print(e)
-    scenario_id = scenario_id[0][0]
-    records = data.to_records(index=False)
-    q = sql.SQL("INSERT INTO dsm2 ()")
+    with psycopg2.connect(**conn_creds) as conn:
+        with conn.cursor() as cur:
+            scenario_id_q = sql.SQL("SELECT id from scenarios where name = %s")
+            cur.execute(scenario_id_q, (scenario_name,))
+            scenario_id = cur.fetchall()
+            if len(scenario_id) == 0:
+                try:
+                    scenario_id = insert_scenario(scenario_name, conn_creds)
+                except Exception as e:
+                    print(e)
+            scenario_id = scenario_id[0][0]
+            data["scenario_id"] = scenario_id
+            query = """
+                INSERT INTO dsm2 (datetime, node, param, value, unit, scenario_id)
+                VALUES (%s, %s, %s, %s, %s, %s)
+                ON CONFLICT (scenario_id, datetime, node, param) DO NOTHING
+            """
+            cur.executemany(query, data.itertuples(index=False, name=None))
 
 
 def insert_scenario(scenario_name: str, conn_creds: dict):
