@@ -17,6 +17,8 @@ numpy==2.2.0
     #   pandas
 pandas==2.2.3
     # via -r requirements.in
+psycopg2==2.9.10
+    # via -r requirements.in
 pygments==2.18.0
     # via rich
 python-dateutil==2.9.0.post0

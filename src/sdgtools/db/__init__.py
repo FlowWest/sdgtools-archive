@@ -1,26 +1,17 @@
 import psycopg2
 from psycopg2 import sql
+from psycopg2.extras import execute_values
 import pandas as pd
 
 
-def insert_scenario(conn_creds: dict, scenario_name: str, comments: str | None = None):
-    conn = psycopg2.connect(**conn_creds)
-    cur = conn.cursor()
-    q = sql.SQL("INSERT INTO scenarios (name, comments) VALUES (%s, %s)")
-    cur.execute(q, (scenario_name, comments))
-
-    conn.commit()
-    cur.close()
-    conn.close()
-
-
-def insert_dsm2_data(
-    data: pd.DataFrame, scenario_name: str, table: str, conn_creds: dict
-):
+def insert_dsm2_data(data: pd.DataFrame, scenario_name: str, conn_creds: dict | str):
     """
     Insert data into database
     """
-    with psycopg2.connect(**conn_creds) as conn:
+    if isinstance(conn_creds, dict):
+        conn_creds = f"postgresql://{conn_creds['user']}:{conn_creds['password']}@{conn_creds['host']}:{conn_creds['port']}/{conn_creds['dbname']}"
+
+    with psycopg2.connect(conn_creds) as conn:
         with conn.cursor() as cur:
             scenario_id_q = sql.SQL("SELECT id from scenarios where name = %s")
             cur.execute(scenario_id_q, (scenario_name,))
@@ -31,18 +22,21 @@ def insert_dsm2_data(
                 except Exception as e:
                     print(e)
             scenario_id = scenario_id[0][0]
-            data["scenario_id"] = scenario_id
+            data["scenario_id"] = int(scenario_id)
             query = """
                 INSERT INTO dsm2 (datetime, node, param, value, unit, scenario_id)
-                VALUES (%s, %s, %s, %s, %s, %s)
+                VALUES %s
                 ON CONFLICT (scenario_id, datetime, node, param) DO NOTHING
             """
-            cur.executemany(query, data.itertuples(index=False, name=None))
+            page_size = 100000
+            records = data.to_records(index=False)
+            t = [tuple(d.tolist()) for d in records]
+            execute_values(cur, query, t, page_size=page_size)
 
 
-def insert_scenario(scenario_name: str, conn_creds: dict):
+def insert_scenario(scenario_name: str, conn_creds: str):
     try:
-        with psycopg2.connect(**conn_creds) as conn:
+        with psycopg2.connect(conn_creds) as conn:
             with conn.cursor() as cur:
                 insert_scenario_q = (
                     "INSERT INTO scenarios(name) VALUES(%s) RETURNING id"

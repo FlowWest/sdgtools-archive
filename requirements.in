@@ -3,4 +3,4 @@ rich_click
 numpy
 pandas
 h5py
-
+psycopg2
