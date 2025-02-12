@@ -56,13 +56,13 @@ For cli help simply call `sdgtools --help`
 Import data from CSV files directly into PostgreSQL database tables.
 
 ```
-sdgtools db insert <csv_file> <table_name> <database_url>
+sdgtools db insert <csv_file> <scenario_name> <database_url>
 ```
 
 ### Parameters
 
 - `csv_file`: Path to your CSV file to import
-- `table_name`: Name of the target database table
+- `scenario_name`: Name of the target database table
 - `database_url`: PostgreSQL connection URL in format: `postgresql://username:password@host:port/database`
 
 ### Example
@@ -77,7 +77,6 @@ sdgtools db insert fpv1ma_hydro_export.csv FPV1Ma postgresql://postgres:pass@sdg
 - Column type inference from CSV data
 - Chunked data insertion for memory efficiency
 - Support for large CSV files
-- Progress indication during import
 
 
 
