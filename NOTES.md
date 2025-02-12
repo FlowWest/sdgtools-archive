@@ -40,6 +40,15 @@ __ELEV__ - represents gate operations
 - GLC_GATEOP
 - OLD_GATEOP
 
+### HYDRO Data
+The HYDRO data that corresponds to datasets of the form __FPV1Ma_hydro.dss__ are used to extract 
+following data.
+
+__STAGE__ - represents water level compliance
+- MHO
+- DGL
+- OLD
+
 Therefore using `sdgtools` we can do the following to get all this data at once:
 
 ```bash
