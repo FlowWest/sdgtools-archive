@@ -1,9 +1,11 @@
-from hecdss import HecDss
 import pandas as pd
 from dataclasses import dataclass
 from pathlib import Path
 import os
 import datetime
+import pyhecdss
+from pyhecdss.pyhecdss import DSSFile, get_matching_ts
+from sdgtools.utils import add_node_and_param_cols
 
 from typing import Any, Dict, List
 
@@ -50,51 +52,23 @@ def concat_parts_to_path(item) -> Dict[str, str]:
     return d
 
 
+def make_regex_from_parts(A=None, B=None, C=None, D=None, E=None, F=None):
+    parts = [A, B, C, D, E, F]
+    return "/" + "/".join(x if x is not None else ".*" for x in parts) + "/"
+
+
 def get_all_data_from_dsm2_dss(
-    dss: HecDss,
-    filter: Dict[str, Any] | None = None,
-    concat: bool = False,
-) -> pd.DataFrame | Dict[str, pd.DataFrame]:
-    out = {}
-    cat = dss.get_catalog()
-    if filter is None:
-        paths = [concat_parts_to_path(i) for i in cat.items]
-    else:
-        paths = []
-        for i in cat.items:
-            if "b" in filter:
-                if i.B in filter.get("b"):
-                    paths.append(concat_parts_to_path(i))
-            elif "c" in filter:
-                if i.C in filter.get("c"):
-                    paths.append(concat_parts_to_path(i))
-            elif "d" in filter:
-                if i.D in filter.get("d"):
-                    paths.append(concat_parts_to_path(i))
-
-    print(f"the paths being used are: {paths}")
-    if len(paths) == 0:
+    file: str, parts_regex: str | None = make_regex_from_parts()
+) -> pd.DataFrame:
+    all_paths = list(pyhecdss.get_matching_ts(file, parts_regex))
+    if len(all_paths) == 0:
         return pd.DataFrame()
-
-    for path in paths:
-        path_data = dss.get(path.get("path"))  # type: ignore
-        datetimes_for_data = path_data.get_dates()  # type: ignore
-        out[path.get("path")] = pd.DataFrame(
-            {
-                "datetime": [
-                    datetime.datetime.strftime(s, "%Y-%m-%d %H:%M:%S")
-                    for s in datetimes_for_data
-                ],  # type: ignore
-                "node": path.get("node"),
-                "param": path.get("param"),
-                "value": path_data.get_values(),  # type: ignore
-                "unit": path_data.units,  # type: ignore
-            }
-        )
-
-    if concat:
-        return pd.concat(out.values())
-    return out
+    data = [add_node_and_param_cols(all_paths[i].data) for i in range(len(all_paths))]
+    concat_data = pd.concat(data)
+    concat_data["unit"] = concat_data["param"].map(
+        {"FLOW": "CFS", "STAGE": "FEET", "DEVICE-FLOW": "CFS"}
+    )
+    return concat_data
 
 
 def read_scenario_dir(
