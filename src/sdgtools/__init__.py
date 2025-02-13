@@ -39,6 +39,16 @@ def insert_into_database(data, db):
 def cli(): ...
 
 
+@cli.command()
+@click.argument("sdg")
+@click.argument("hydro")
+@click.argument("echo")
+def scenario(sdg, hydro, echo):
+    """
+    Perform Scneario level process.
+    """
+
+
 # DSS processing
 @cli.command()
 @click.argument("file", type=str)
@@ -107,24 +117,6 @@ def h5(file):
                 fg="red",
             )
         )
-
-
-@cli.command()
-@click.argument("echofile")
-@click.option(
-    "--table", "-t", help="a commma seperated list of tables to read from echo file"
-)
-def echo(echofile, table):
-    """
-    Process Echo file: csv will be generated for all tables extracted from the echo file
-
-    """
-    tables = table.split(",")
-    click.echo(f"processing {tables}")
-    filepath = pathlib.Path(echofile)
-    data = read_echo_file(filepath, tables)
-    for k, v in data.items():
-        v.to_csv(f"{k}_echo_file.csv", index=False)
 
 
 @cli.command()

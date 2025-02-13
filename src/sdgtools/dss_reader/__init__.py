@@ -11,6 +11,8 @@ from typing import Any, Dict, List
 
 from pandas.core.series import validate_bool_kwarg
 
+param_to_unit = {"FLOW": "CFS", "STAGE": "FEET", "DEVICE-FLOW": "CFS"}
+
 
 def read_echo_file(filepath: str):
     with open(filepath, "r") as f:
@@ -65,14 +67,16 @@ def get_all_data_from_dsm2_dss(
         return pd.DataFrame()
     data = [add_node_and_param_cols(all_paths[i].data) for i in range(len(all_paths))]
     concat_data = pd.concat(data)
-    concat_data["unit"] = concat_data["param"].map(
-        {"FLOW": "CFS", "STAGE": "FEET", "DEVICE-FLOW": "CFS"}
-    )
+    concat_data["unit"] = concat_data["param"].map(param_to_unit)
     return concat_data
 
 
 def read_scenario_dir(
-    dir: str, v7_filter: str | None = None
+    sdg_path: str,
+    hydro_path: str,
+    echo_path: str,
+    dir: str,
+    v7_filter: str | None = None,
 ) -> Dict[str, Dict[str, pd.DataFrame]]:
     """
     Reads and processes scenario data from a directory containing DSS files.
