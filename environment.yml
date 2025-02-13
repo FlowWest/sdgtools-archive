@@ -1,0 +1,23 @@
+name: sdgtools
+channels:
+  - https://repo.anaconda.com/pkgs/main
+  - https://repo.anaconda.com/pkgs/r
+  - cadwr-dms
+  - conda-forge
+dependencies:
+  - python=3.11
+  - pyhecdss
+  - rich-click
+  - numpy
+  - click
+  - pandas
+  - h5py
+  - psycopg2
+  - pydsm
+  - hatchling
+  - geopandas
+  - holoviews
+  - hvplot
+  - dask
+  - decorator
+prefix: /home/emanuel/miniconda3/envs/sdgtools
