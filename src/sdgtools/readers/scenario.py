@@ -86,16 +86,20 @@ def read_scenario(
     sdg_stage = read_dss(
         sdg_path, make_dss_regex_from_parts(B=SDG_ELEVATION_LIST, C="STAGE")
     )
+    # sdg_stage['scenario_name'] = scenario_name
     sdg_flow = read_dss(
         sdg_path, make_dss_regex_from_parts(B=SDG_FLOW_LIST, C="DEVICE-FLOW")
     )
+    # sdg_flow['scenario_name'] = scenario_name
     sdg_gate_ops = read_dss(
         sdg_path, make_dss_regex_from_parts(B=SDG_GATE_OP_LIST, C="ELEV")
     )
+    # sdg_gate_ops['scenario_name'] = scenario_name
 
     hydro_data = read_dss(
         hydro_path, make_dss_regex_from_parts(B=HYDRO_STATION_NAMES, C="STAGE")
     )
+    # hydro_data['scenario_name'] = scenario_name
 
     # echo file
     echo_data = read_input(echo_path)

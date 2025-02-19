@@ -2,7 +2,7 @@ import pyhecdss
 import pandas as pd
 
 
-PARAM_TO_UNIT = {"FLOW": "CFS", "STAGE": "FEET", "DEVICE-FLOW": "CFS"}
+PARAM_TO_UNIT = {"flow": "CFS", "stage": "FEET", "device-flow": "CFS"}
 
 
 def add_node_and_param_cols(df):
@@ -10,8 +10,8 @@ def add_node_and_param_cols(df):
     df_copy = df_copy.reset_index(names=["datetime"])
     col_to_sep = df_copy.columns[1]
     dss_parts = col_to_sep.split("/")
-    df_copy["node"] = dss_parts[2]
-    df_copy["param"] = dss_parts[3]
+    df_copy["node"] = dss_parts[2].lower()
+    df_copy["param"] = dss_parts[3].lower()
     df_copy = df_copy.rename(columns={col_to_sep: "value"})
     return df_copy
 
@@ -39,4 +39,5 @@ def read_dss(
     data = [add_node_and_param_cols(all_paths[i].data) for i in range(len(all_paths))]
     concat_data = pd.concat(data)
     concat_data["unit"] = concat_data["param"].map(PARAM_TO_UNIT)
+    concat_data = concat_data[["datetime", "node", "param", "value", "unit"]]
     return concat_data

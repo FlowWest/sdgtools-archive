@@ -23,14 +23,15 @@ def insert_dsm2_data(data: pd.DataFrame, scenario_name: str, conn_creds: dict | 
                     print(e)
             scenario_id = scenario_id[0][0]
             data["scenario_id"] = int(scenario_id)
+            data["datetime"] = data["datetime"].dt.to_pydatetime()
             query = """
                 INSERT INTO dsm2 (datetime, node, param, value, unit, scenario_id)
                 VALUES %s
                 ON CONFLICT (scenario_id, datetime, node, param) DO NOTHING
             """
             page_size = 100000
-            records = data.to_records(index=False)
-            t = [tuple(d.tolist()) for d in records]
+            records_dict = data.to_dict(orient='records')
+            t = [tuple(record.values()) for record in records_dict]
             execute_values(cur, query, t, page_size=page_size)
 
 
