@@ -3,6 +3,11 @@ from psycopg2 import sql
 from psycopg2.extras import execute_values
 import pandas as pd
 
+from ..readers.scenario import ScenarioData
+
+
+def insert_scenario_data(data: ScenarioData, conn_creds: str): ...
+
 
 def insert_dsm2_data(data: pd.DataFrame, scenario_name: str, conn_creds: dict | str):
     """

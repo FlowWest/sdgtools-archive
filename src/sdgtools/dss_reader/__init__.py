@@ -75,8 +75,6 @@ def read_scenario_dir(
     sdg_path: str,
     hydro_path: str,
     echo_path: str,
-    dir: str,
-    v7_filter: str | None = None,
 ) -> Dict[str, Dict[str, pd.DataFrame]]:
     """
     Reads and processes scenario data from a directory containing DSS files.

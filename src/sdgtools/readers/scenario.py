@@ -3,7 +3,6 @@ from typing import Dict, Any
 from .dss import read_dss, make_dss_regex_from_parts
 
 import pandas as pd
-import pyhecdss
 from pydsm.input import read_input
 
 SDG_ELEVATION_LIST = [
@@ -92,7 +91,6 @@ def read_scenario(
     sdg_gate_ops = read_dss(
         sdg_path, make_dss_regex_from_parts(B=SDG_GATE_OP_LIST, C="ELEV")
     )
-
     hydro_data = read_dss(
         hydro_path, make_dss_regex_from_parts(B=HYDRO_STATION_NAMES, C="STAGE")
     )
