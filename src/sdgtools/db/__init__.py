@@ -9,34 +9,39 @@ from ..readers.scenario import ScenarioData
 def insert_scenario_data(data: ScenarioData, conn_creds: str): ...
 
 
+import io
+
+
 def insert_dsm2_data(data: pd.DataFrame, scenario_name: str, conn_creds: dict | str):
-    """
-    Insert data into database
-    """
     if isinstance(conn_creds, dict):
         conn_creds = f"postgresql://{conn_creds['user']}:{conn_creds['password']}@{conn_creds['host']}:{conn_creds['port']}/{conn_creds['dbname']}"
 
     with psycopg2.connect(conn_creds) as conn:
         with conn.cursor() as cur:
-            scenario_id_q = sql.SQL("SELECT id from scenarios where name = %s")
-            cur.execute(scenario_id_q, (scenario_name,))
-            scenario_id = cur.fetchall()
-            if len(scenario_id) == 0:
-                try:
-                    scenario_id = insert_scenario(scenario_name, conn_creds)
-                except Exception as e:
-                    print(e)
-            scenario_id = scenario_id[0][0]
-            data["scenario_id"] = int(scenario_id)
-            query = """
-                INSERT INTO dsm2 (datetime, node, param, value, unit, scenario_id)
-                VALUES %s
-                ON CONFLICT (scenario_id, datetime, node, param) DO NOTHING
+            cur.execute("SELECT id FROM scenarios WHERE name = %s", (scenario_name,))
+            scenario_id = cur.fetchone()
+            if not scenario_id:
+                scenario_id = insert_scenario(scenario_name, conn_creds)
+            scenario_id = scenario_id[0]
+
+            data["scenario_id"] = scenario_id
+            # data["datetime"] = data["datetime"].dt.to_pydatetime()
+            data["datetime"] = data["datetime"].dt.strftime("%Y-%m-%d %H:%M:%S")
+
+            buffer = io.StringIO()
+            data.to_csv(buffer, index=False, header=False)
+            buffer.seek(0)
+
+            copy_sql = """
+                COPY dsm2(datetime, node, param, value, unit, scenario_id)
+                FROM STDIN WITH CSV
             """
-            page_size = 100000
-            records = data.to_records(index=False)
-            t = [tuple(d.tolist()) for d in records]
-            execute_values(cur, query, t, page_size=page_size)
+            try:
+                cur.copy_expert(copy_sql, buffer)
+                conn.commit()
+            except Exception as e:
+                conn.rollback()
+                print(f"Error during COPY: {e}")
 
 
 def insert_scenario(scenario_name: str, conn_creds: str):
